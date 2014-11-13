@@ -1,3 +1,11 @@
+*  novelty
+   *   Use Pebbles features
+      *   sensors
+   *   Art and Design
+      *   1 bit black & white: retro, dither art
+   *   Social Aspect: interaction
+
+
 # [Pebble Guide](http://developer.getpebble.com/guides/)
 
 *   App Events
