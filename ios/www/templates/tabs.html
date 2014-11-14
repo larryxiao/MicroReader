@@ -3,25 +3,32 @@
   Each tab's child <ion-nav-view> directive will have its own 
   navigation history that also transitions its views in and out.
 -->
-<ion-tabs class="tabs-icon-top">
+<ion-tabs class="tabs-striped tabs-background-dark tabs-color-assertive">
 
-
-  <!-- Dashboard Tab -->
-  <ion-tab title="Dashboard" icon="icon ion-home" href="#/tab/dash">
+  <ion-tab title="Home" icon="icon ion-home" href="#/tab/dash">
     <ion-nav-view name="tab-dash"></ion-nav-view>
   </ion-tab>
 
-
-  <!-- Friends Tab -->
-  <ion-tab title="Taste" icon="icon ion-heart" href="#/tab/friends">
-    <ion-nav-view name="tab-friends"></ion-nav-view>
+  <ion-tab title="Friends" icon="icon ion-heart" href="#/tab/personal">
+    <ion-nav-view name="tab-personal"></ion-nav-view>
   </ion-tab>
 
-
-  <!-- Account Tab -->
-  <ion-tab title="Setting" icon="icon ion-gear-b" href="#/tab/account">
-    <ion-nav-view name="tab-account"></ion-nav-view>
+  <ion-tab title="Account" icon="icon ion-gear-b" href="#/tab/setting">
+    <ion-nav-view name="tab-setting"></ion-nav-view>
   </ion-tab>
 
+</ion-tabs> 
 
-</ion-tabs>
+ <!-- <div class="tabs-striped tabs-background-dark tabs-color-assertive">
+    <div class="tabs">
+      <a class="tab-item active" href="#/tab/dash">
+        <i class="icon ion-home"></i>
+      </a>
+      <a class="tab-item" href="#/tab/friends">
+        <i class="icon ion-star"></i>
+      </a>
+      <a class="tab-item" href="#/tab/account">
+        <i class="icon ion-gear-a"></i>
+      </a>
+    </div>
+  </div> -->
