@@ -132,6 +132,11 @@ static void timer_callback() {
 
     // strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
 
+    // report read speed
+    static char speed_buffer[8];
+    snprintf(speed_buffer, sizeof(speed_buffer), "%d wpm", wpm);
+    text_layer_set_text(s_status_layer, speed_buffer);
+
     timer = app_timer_register(60*1000/wpm+factor*factorEnabled, (AppTimerCallback) timer_callback, NULL);
 }
 
@@ -158,16 +163,18 @@ static void main_window_load(Window *window) {
     // Add it as a child layer to the Window's root layer
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_word_layer));
 
-    // Create abstract Layer
-    s_status_layer = text_layer_create(GRect(3, 72, 139, 50));
+    // Create summary Layer
+    s_status_layer = text_layer_create(GRect(0, 120, 144, 25));
     text_layer_set_background_color(s_status_layer, GColorClear);
     text_layer_set_text_color(s_status_layer, GColorWhite);
-    text_layer_set_text_alignment(s_status_layer, GTextAlignmentLeft);
+    text_layer_set_text_alignment(s_status_layer, GTextAlignmentCenter);
     text_layer_set_text(s_status_layer, "Hello World!");
     // Create second custom font, apply it and add to Window
-    s_status_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+    s_status_font = 
+        // fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+        fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SANSATION_18));
     text_layer_set_font(s_status_layer, s_status_font);
-    //layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));
 }
 
 static void main_window_unload(Window *window) {
@@ -264,12 +271,18 @@ static void select_single_click_handler(ClickRecognizerRef recognizer, void *con
 static void up_multi_click_handler(ClickRecognizerRef recognizer, void *context) {
     wpm += 50;
     if (wpm > 2000) wpm = 2000;
+    static char speed_buffer[8];
+    snprintf(speed_buffer, sizeof(speed_buffer), "%d wpm", wpm);
+    text_layer_set_text(s_status_layer, speed_buffer);
     APP_LOG(APP_LOG_LEVEL_INFO, "up_multi_click_handler success!");
 }
 
 static void down_multi_click_handler(ClickRecognizerRef recognizer, void *context) {
     wpm -= 50;
     if (wpm < 100) wpm = 100;
+    static char speed_buffer[8];
+    snprintf(speed_buffer, sizeof(speed_buffer), "%d wpm", wpm);
+    text_layer_set_text(s_status_layer, speed_buffer);
     APP_LOG(APP_LOG_LEVEL_INFO, "down_multi_click_handler success!");
 }
 

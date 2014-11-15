@@ -22,13 +22,8 @@
                 "type": "font"
             },
             {
-                "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_20",
-                "type": "font"
-            },
-            {
-                "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_16",
+                "file": "fonts/Sansation-Regular.ttf",
+                "name": "FONT_SANSATION_18",
                 "type": "font"
             }
         ]
