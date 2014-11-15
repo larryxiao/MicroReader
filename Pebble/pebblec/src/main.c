@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include <string.h>
   
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
@@ -13,6 +14,8 @@ static GFont s_status_font;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
 static char * content;
+static int start_entry;
+static int next_word;
 
 static void update_time() {
   // Get a tm structure
@@ -20,7 +23,50 @@ static void update_time() {
   struct tm *tick_time = localtime(&temp);
 
   // Create a long-lived buffer
-  static char buffer[] = "Spribblealism";
+  static char *buffer;
+
+    int start_char = start_entry, end_char;
+    int len = strlen(content);
+    int char_index;
+    next_word = 0;
+    while (start_char < len) {
+        if ((content[start_char] <= '9' && content[start_char] >= '0')
+            || (content[start_char] <= 'z' && content[start_char] >= 'a')
+            || (content[start_char] <= 'Z' && content[start_char] >= 'A')
+            || (content[start_char] == '@')
+            || (content[start_char] == '#')
+            || (content[start_char] == '$')
+            || (content[start_char] == '%')
+            || (content[start_char] == '&')
+            || (content[start_char] == '\''))
+        {
+            next_word = 1;
+            break;
+        }
+        start_char++;
+    }
+    
+    if(next_word == 0)
+        return;
+    
+    end_char = start_char;
+    while (end_char < len &&
+           ((content[end_char] <= '9' && content[end_char] >= '0')
+            || (content[end_char] <= 'z' && content[end_char] >= 'a')
+            || (content[end_char] <= 'Z' && content[end_char] >= 'A')
+            || (content[end_char] == '@')
+            || (content[end_char] == '#')
+            || (content[end_char] == '$')
+            || (content[end_char] == '%')
+            || (content[end_char] == '&')
+            || (content[end_char] == '\''))) {
+               end_char++;
+           }
+    
+    buffer = (char*)malloc(sizeof(char)*(end_char - start_char));
+    for (char_index = start_char; char_index < end_char; char_index++) {
+        buffer[char_index - start_char] = content[char_index];
+    }
 
   // split content to get clean word everytime it's called
 
@@ -28,6 +74,8 @@ static void update_time() {
 
   // Display this time on the TextLayer
   text_layer_set_text(s_word_layer, buffer);
+    free(buffer);
+    start_entry = end_char + 1;
 }
 
 static void main_window_load(Window *window) {
@@ -152,6 +200,8 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 static void init() {
   // Spribble init
   content = "Hi, this is team spribble at HackShanghai!";
+    
+  start_entry = 0;
 
   // Create main Window element and assign to pointer
   s_main_window = window_create();
