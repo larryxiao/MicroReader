@@ -1,7 +1,7 @@
 {
-  "name": "pebbleread",
+  "name": "PebbleRead",
   "version": "1.0.0",
-  "description": "pebbleread: An Ionic project",
+  "description": "PebbleRead: Personal Smart Watch Reader",
   "dependencies": {
     "gulp": "^3.5.6",
     "gulp-sass": "^0.7.1",
