@@ -6,3 +6,6 @@ install:
 
 clean:
 	pebble clean
+
+list:
+	pebble list --phone 172.27.221.14

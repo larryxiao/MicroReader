@@ -4,14 +4,15 @@
 #define KEY_CONDITIONS 1
   
 static Window *s_main_window;
-static TextLayer *s_time_layer;
-static TextLayer *s_weather_layer;
+static TextLayer *s_word_layer;
+static TextLayer *s_status_layer;
 
-static GFont s_time_font;
-static GFont s_weather_font;
+static GFont s_word_font;
+static GFont s_status_font;
 
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
+static char * content;
 
 static void update_time() {
   // Get a tm structure
@@ -19,19 +20,14 @@ static void update_time() {
   struct tm *tick_time = localtime(&temp);
 
   // Create a long-lived buffer
-  static char buffer[] = "00:00";
+  static char buffer[] = "Spribblealism";
 
-  // Write the current hours and minutes into the buffer
-  if(clock_is_24h_style() == true) {
-    //Use 2h hour format
-    strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
-  } else {
-    //Use 12 hour format
-    strftime(buffer, sizeof("00:00"), "%I:%M", tick_time);
-  }
+  // split content to get clean word everytime it's called
+
+  // strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
 
   // Display this time on the TextLayer
-  text_layer_set_text(s_time_layer, buffer);
+  text_layer_set_text(s_word_layer, buffer);
 }
 
 static void main_window_load(Window *window) {
@@ -42,32 +38,32 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
   
   // Create time TextLayer
-  s_time_layer = text_layer_create(GRect(5, 52, 139, 50));
-  text_layer_set_background_color(s_time_layer, GColorClear);
-  text_layer_set_text_color(s_time_layer, GColorBlack);
-  text_layer_set_text(s_time_layer, "00:00");
+  s_word_layer = text_layer_create(GRect(3, 72, 139, 50));
+  text_layer_set_background_color(s_word_layer, GColorClear);
+  text_layer_set_text_color(s_word_layer, GColorWhite);
+  text_layer_set_text(s_word_layer, "Spribblealism");
   
   //Create GFont
-  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_48));
+  s_word_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_16));
 
   //Apply to TextLayer
-  text_layer_set_font(s_time_layer, s_time_font);
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+  text_layer_set_font(s_word_layer, s_word_font);
+  text_layer_set_text_alignment(s_word_layer, GTextAlignmentCenter);
 
   // Add it as a child layer to the Window's root layer
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_word_layer));
   
   // Create temperature Layer
-  s_weather_layer = text_layer_create(GRect(0, 130, 144, 25));
-  text_layer_set_background_color(s_weather_layer, GColorClear);
-  text_layer_set_text_color(s_weather_layer, GColorWhite);
-  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
-  text_layer_set_text(s_weather_layer, "Loading...");
+  s_status_layer = text_layer_create(GRect(0, 130, 144, 25));
+  text_layer_set_background_color(s_status_layer, GColorClear);
+  text_layer_set_text_color(s_status_layer, GColorWhite);
+  text_layer_set_text_alignment(s_status_layer, GTextAlignmentCenter);
+  text_layer_set_text(s_status_layer, "Loading...");
   
   // Create second custom font, apply it and add to Window
-  s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
-  text_layer_set_font(s_weather_layer, s_weather_font);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
+  s_status_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+  text_layer_set_font(s_status_layer, s_status_font);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));
   
   // Make sure the time is displayed from the start
   update_time();
@@ -75,7 +71,7 @@ static void main_window_load(Window *window) {
 
 static void main_window_unload(Window *window) {
   //Unload GFont
-  fonts_unload_custom_font(s_time_font);
+  fonts_unload_custom_font(s_word_font);
   
   //Destroy GBitmap
   gbitmap_destroy(s_background_bitmap);
@@ -84,11 +80,11 @@ static void main_window_unload(Window *window) {
   bitmap_layer_destroy(s_background_layer);
   
   // Destroy TextLayer
-  text_layer_destroy(s_time_layer);
+  text_layer_destroy(s_word_layer);
   
   // Destroy weather elements
-  text_layer_destroy(s_weather_layer);
-  fonts_unload_custom_font(s_weather_font);
+  text_layer_destroy(s_status_layer);
+  fonts_unload_custom_font(s_status_font);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -138,7 +134,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   
   // Assemble full string and display
   snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
-  text_layer_set_text(s_weather_layer, weather_layer_buffer);
+  text_layer_set_text(s_status_layer, weather_layer_buffer);
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -154,6 +150,9 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 }
   
 static void init() {
+  // Spribble init
+  content = "Hi, this is team spribble at HackShanghai!";
+
   // Create main Window element and assign to pointer
   s_main_window = window_create();
 
