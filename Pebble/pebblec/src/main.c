@@ -1,8 +1,8 @@
 #include <pebble.h>
 #include <string.h>
 
-#define KEY_TEMPERATURE 0
-#define KEY_CONDITIONS 1
+#define KEY_TITLE 0
+#define KEY_SUMMARY 1
 
 static Window *s_main_window;
 static TextLayer *s_word_layer;
@@ -14,6 +14,7 @@ static GFont s_status_font;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
 static char * content;
+static char * title;
 static int start_entry;
 static int next_word;
 
@@ -95,39 +96,31 @@ static void main_window_load(Window *window) {
     bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
     layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
 
-    // Create time TextLayer
+    // Create Summary TextLayer
     s_word_layer = text_layer_create(GRect(3, 72, 139, 50));
     text_layer_set_background_color(s_word_layer, GColorClear);
     text_layer_set_text_color(s_word_layer, GColorWhite);
     text_layer_set_text(s_word_layer, "Spribblealism");
-
     //Create GFont
     s_word_font = 
         // fonts_get_system_font("RESOURCE_ID_ROBOTO_CONDENSED_21")
         // fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
         fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SANSATION_20));
-
     //Apply to TextLayer
     text_layer_set_font(s_word_layer, s_word_font);
     text_layer_set_text_alignment(s_word_layer, GTextAlignmentCenter);
-
     // Add it as a child layer to the Window's root layer
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_word_layer));
 
-    // Create temperature Layer
-    s_status_layer = text_layer_create(GRect(0, 130, 144, 25));
+    // Create abstract Layer
+    s_status_layer = text_layer_create(GRect(3, 72, 139, 50));
     text_layer_set_background_color(s_status_layer, GColorClear);
     text_layer_set_text_color(s_status_layer, GColorWhite);
     text_layer_set_text_alignment(s_status_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_status_layer, "Loading...");
-
     // Create second custom font, apply it and add to Window
     s_status_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
     text_layer_set_font(s_status_layer, s_status_font);
-    //layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));
-
-    // Make sure the time is displayed from the start
-    // update_time();
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));
 }
 
 static void main_window_unload(Window *window) {
@@ -148,28 +141,25 @@ static void main_window_unload(Window *window) {
     fonts_unload_custom_font(s_status_font);
 }
 
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-    //update_time();
+static void send_request() {
+    // Begin dictionary
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
 
-    // Get weather update every 30 minutes
-    if(tick_time->tm_min % 30 == 0) {
-        // Begin dictionary
-        DictionaryIterator *iter;
-        app_message_outbox_begin(&iter);
+    // Add a key-value pair
+    dict_write_uint8(iter, 0, 0);
 
-        // Add a key-value pair
-        dict_write_uint8(iter, 0, 0);
-
-        // Send the message!
-        app_message_outbox_send();
-    }
+    // Send the message!
+    app_message_outbox_send();
 }
+
+/* communication handler */ 
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
     // Store incoming information
-    static char temperature_buffer[8];
-    static char conditions_buffer[32];
-    static char weather_layer_buffer[32];
+    free(content);
+    content = malloc(256);
+    title = malloc(50);
 
     // Read first item
     Tuple *t = dict_read_first(iterator);
@@ -178,11 +168,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     while(t != NULL) {
         // Which key was received?
         switch(t->key) {
-            case KEY_TEMPERATURE:
-                snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);
+            /*case KEY_TEMPERATURE:*/
+                /*snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);*/
+                /*break;*/
+            case KEY_TITLE:
+                snprintf(title, sizeof(title), "%s", t->value->cstring);
                 break;
-            case KEY_CONDITIONS:
-                snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
+            case KEY_SUMMARY:
+                snprintf(content, sizeof(content), "%s", t->value->cstring);
                 break;
             default:
                 APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
@@ -193,9 +186,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         t = dict_read_next(iterator);
     }
 
-    // Assemble full string and display
-    snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
-    text_layer_set_text(s_status_layer, weather_layer_buffer);
+    // ready
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -209,6 +200,8 @@ static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResul
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
+
+/* clicks handler */
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "up_single_click_handler success!");
@@ -265,7 +258,8 @@ static void config_provider(Window *window) {
 
 static void init() {
     // Spribble init
-    content = "Hi, this is team PebbleReader at HackShanghai! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu consectetur eros. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Suspendisse vulputate iaculis metus ut lacinia. Nunc dapibus elit in turpis euismod volutpat. Aenean magna neque, fringilla id dui eget, imperdiet volutpat justo. Aliquam ut diam malesuada nunc consectetur vulputate eget ut augue. Nullam lacinia vestibulum lacinia. Pellentesque nisl eros, elementum nec nibh a, efficitur elementum orci. Morbi dolor nisi, mattis sit amet velit eu, maximus tempus odio. Curabitur placerat pulvinar nisi. Nulla auctor tempor viverra. Vestibulum nec urna interdum, imperdiet quam vel, viverra enim. Aenean vitae metus nibh.";
+    title = "Hello World!";
+    content = "Hi, this is team PebbleReader at HackShanghai! (introduction) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu consectetur eros. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Suspendisse vulputate iaculis metus ut lacinia. Nunc dapibus elit in turpis euismod volutpat. Aenean magna neque, fringilla id dui eget, imperdiet volutpat justo. Aliquam ut diam malesuada nunc consectetur vulputate eget ut augue. Nullam lacinia vestibulum lacinia. Pellentesque nisl eros, elementum nec nibh a, efficitur elementum orci. Morbi dolor nisi, mattis sit amet velit eu, maximus tempus odio. Curabitur placerat pulvinar nisi. Nulla auctor tempor viverra. Vestibulum nec urna interdum, imperdiet quam vel, viverra enim. Aenean vitae metus nibh.";
 
     start_entry = 0;
 
