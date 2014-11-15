@@ -102,7 +102,10 @@ static void main_window_load(Window *window) {
     text_layer_set_text(s_word_layer, "Spribblealism");
 
     //Create GFont
-    s_word_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_16));
+    s_word_font = 
+       // fonts_get_system_font("RESOURCE_ID_ROBOTO_CONDENSED_21")
+       // fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+       fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SANSATION_20));
 
     //Apply to TextLayer
     text_layer_set_font(s_word_layer, s_word_font);
@@ -112,16 +115,16 @@ static void main_window_load(Window *window) {
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_word_layer));
 
     // Create temperature Layer
-    s_status_layer = text_layer_create(GRect(0, 130, 144, 25));
-    text_layer_set_background_color(s_status_layer, GColorClear);
-    text_layer_set_text_color(s_status_layer, GColorWhite);
-    text_layer_set_text_alignment(s_status_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_status_layer, "Loading...");
+    /*s_status_layer = text_layer_create(GRect(0, 130, 144, 25));*/
+    /*text_layer_set_background_color(s_status_layer, GColorClear);*/
+    /*text_layer_set_text_color(s_status_layer, GColorWhite);*/
+    /*text_layer_set_text_alignment(s_status_layer, GTextAlignmentCenter);*/
+    /*text_layer_set_text(s_status_layer, "Loading...");*/
 
-    // Create second custom font, apply it and add to Window
-    s_status_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
-    text_layer_set_font(s_status_layer, s_status_font);
-    layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));
+    /*// Create second custom font, apply it and add to Window*/
+    /*s_status_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));*/
+    /*text_layer_set_font(s_status_layer, s_status_font);*/
+    /*layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));*/
 
     // Make sure the time is displayed from the start
     // update_time();
@@ -209,7 +212,7 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 
 static void init() {
   // Spribble init
-  content = "Hi, this is team spribble at HackShanghai!";
+  content = "Hi, this is team PebbleReader at HackShanghai! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu consectetur eros. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Suspendisse vulputate iaculis metus ut lacinia. Nunc dapibus elit in turpis euismod volutpat. Aenean magna neque, fringilla id dui eget, imperdiet volutpat justo. Aliquam ut diam malesuada nunc consectetur vulputate eget ut augue. Nullam lacinia vestibulum lacinia. Pellentesque nisl eros, elementum nec nibh a, efficitur elementum orci. Morbi dolor nisi, mattis sit amet velit eu, maximus tempus odio. Curabitur placerat pulvinar nisi. Nulla auctor tempor viverra. Vestibulum nec urna interdum, imperdiet quam vel, viverra enim. Aenean vitae metus nibh.";
     
   start_entry = 0;
 
