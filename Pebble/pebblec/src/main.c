@@ -21,6 +21,8 @@ static int next_word;
 static bool flag = true;
 static AppTimer *timer;
 static int wpm = 300;
+static int factor = 1;
+static int factorEnabled = 0;
 
 static void timer_callback() {
     // Get a tm structure
@@ -43,6 +45,7 @@ static void timer_callback() {
                 || (content[start_char] == '$')
                 || (content[start_char] == '%')
                 || (content[start_char] == '&')
+                //              || (content[start_char] == 'º')
                 || (content[start_char] == '\''))
         {
             next_word = 1;
@@ -51,8 +54,10 @@ static void timer_callback() {
         start_char++;
     }
 
-    if(next_word == 0)
+    if(next_word == 0) {
+        timer = app_timer_register(60*1000/wpm, (AppTimerCallback) timer_callback, NULL);
         return;
+    }
 
     end_char = start_char;
     while (end_char < len &&
@@ -64,15 +69,56 @@ static void timer_callback() {
              || (content[end_char] == '$')
              || (content[end_char] == '%')
              || (content[end_char] == '&')
+             //          || (content[start_char] == 'º')
              || (content[end_char] == '\''))) {
         end_char++;
     }
 
-    buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char));
-    for (char_index = start_char; char_index < end_char; char_index++) {
-        buffer[char_index - start_char] = content[char_index];
+    if (end_char - start_char <= 2) {
+        /*1 6*/
+        /*2 6*/
+        /*3 4*/
+        /*4 4*/
+        /*5 4*/
+        buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 7));
+        memset(buffer, ' ', 7);
+        for (char_index = start_char; char_index < end_char; char_index++) {
+            buffer[char_index - start_char + 7] = content[char_index];
+        }
+        // magic formula
+        factor = (4 - end_char + start_char)*5 + 0*1 + 1;
+        buffer[end_char - start_char + 7] = 0;
+    } else {
+        if (end_char - start_char <= 6) {
+            buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 6));
+            memset(buffer, ' ', 6);
+            for (char_index = start_char; char_index < end_char; char_index++) {
+                buffer[char_index - start_char + 6] = content[char_index];
+            }
+            // magic formula
+            factor = (4 - end_char + start_char)*5 + 0*1 + 1;
+            buffer[end_char - start_char + 6] = 0;
+        } else {
+            if (end_char - start_char <= 11) {
+                buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 3));
+                memset(buffer, ' ', 3);
+                for (char_index = start_char; char_index < end_char; char_index++) {
+                    buffer[char_index - start_char + 3] = content[char_index];
+                }
+                // magic formula
+                factor = (4 - end_char + start_char)*5 + 0*1 + 1;
+                buffer[end_char - start_char + 3] = 0;
+            } else {
+                buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char));
+                for (char_index = start_char; char_index < end_char; char_index++) {
+                    buffer[char_index - start_char] = content[char_index];
+                }
+                // magic formula
+                factor = (4 - end_char + start_char)*5 + 0*1 + 1;
+                buffer[end_char - start_char] = 0;
+            }
+        }
     }
-    buffer[end_char - start_char] = 0;
 
     // split content to get clean word everytime it's called
 
@@ -86,7 +132,7 @@ static void timer_callback() {
 
     // strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
 
-    timer = app_timer_register(60*1000/wpm, (AppTimerCallback) timer_callback, NULL);
+    timer = app_timer_register(60*1000/wpm+factor*factorEnabled, (AppTimerCallback) timer_callback, NULL);
 }
 
 static void main_window_load(Window *window) {
@@ -108,7 +154,7 @@ static void main_window_load(Window *window) {
         fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SANSATION_20));
     //Apply to TextLayer
     text_layer_set_font(s_word_layer, s_word_font);
-    text_layer_set_text_alignment(s_word_layer, GTextAlignmentCenter);
+    text_layer_set_text_alignment(s_word_layer, GTextAlignmentLeft);
     // Add it as a child layer to the Window's root layer
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_word_layer));
 
@@ -116,17 +162,15 @@ static void main_window_load(Window *window) {
     s_status_layer = text_layer_create(GRect(3, 72, 139, 50));
     text_layer_set_background_color(s_status_layer, GColorClear);
     text_layer_set_text_color(s_status_layer, GColorWhite);
-    text_layer_set_text_alignment(s_status_layer, GTextAlignmentCenter);
+    text_layer_set_text_alignment(s_status_layer, GTextAlignmentLeft);
+    text_layer_set_text(s_status_layer, "Hello World!");
     // Create second custom font, apply it and add to Window
     s_status_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
     text_layer_set_font(s_status_layer, s_status_font);
-    layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));
+    //layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_status_layer));
 }
 
 static void main_window_unload(Window *window) {
-    //Unload GFont
-    fonts_unload_custom_font(s_word_font);
-
     //Destroy GBitmap
     gbitmap_destroy(s_background_bitmap);
 
@@ -135,9 +179,9 @@ static void main_window_unload(Window *window) {
 
     // Destroy TextLayer
     text_layer_destroy(s_word_layer);
-
-    // Destroy weather elements
     text_layer_destroy(s_status_layer);
+    //Unload GFont
+    fonts_unload_custom_font(s_word_font);
     fonts_unload_custom_font(s_status_font);
 }
 
@@ -169,8 +213,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Which key was received?
         switch(t->key) {
             /*case KEY_TEMPERATURE:*/
-                /*snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);*/
-                /*break;*/
+            /*snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);*/
+            /*break;*/
             case KEY_TITLE:
                 snprintf(title, sizeof(title), "%s", t->value->cstring);
                 break;
@@ -218,15 +262,20 @@ static void select_single_click_handler(ClickRecognizerRef recognizer, void *con
 }
 
 static void up_multi_click_handler(ClickRecognizerRef recognizer, void *context) {
-    wpm += 100;
+    wpm += 50;
     if (wpm > 2000) wpm = 2000;
     APP_LOG(APP_LOG_LEVEL_INFO, "up_multi_click_handler success!");
 }
 
 static void down_multi_click_handler(ClickRecognizerRef recognizer, void *context) {
-    wpm -= 100;
+    wpm -= 50;
     if (wpm < 100) wpm = 100;
     APP_LOG(APP_LOG_LEVEL_INFO, "down_multi_click_handler success!");
+}
+
+static void select_multi_click_handler(ClickRecognizerRef recognizer, void *context) {
+    factorEnabled = 0 ? 1 : 0;
+    APP_LOG(APP_LOG_LEVEL_INFO, "select_multi_click_handler success!");
 }
 
 // auto adjust speed
@@ -250,6 +299,7 @@ static void config_provider(Window *window) {
     /*window_multi_click_subscribe(BUTTON_ID_DOWN, 2, 10, 400, false, down_multi_click_handler);*/
     window_multi_click_subscribe(BUTTON_ID_UP, 0, 0, 0, false, up_multi_click_handler);
     window_multi_click_subscribe(BUTTON_ID_DOWN, 0, 0, 0, false, down_multi_click_handler);
+    window_multi_click_subscribe(BUTTON_ID_SELECT, 0, 0, 0, false, select_multi_click_handler);
 
     // long click config:
     window_long_click_subscribe(BUTTON_ID_SELECT, 700, select_long_click_handler, select_long_click_release_handler);
@@ -282,14 +332,14 @@ static void init() {
     /*tick_timer_service_subscribe(SECOND_UNIT, tick_handler);*/
     timer = app_timer_register(60*1000/wpm, (AppTimerCallback) timer_callback, NULL);
 
-    // Register callbacks
-    app_message_register_inbox_received(inbox_received_callback);
-    app_message_register_inbox_dropped(inbox_dropped_callback);
-    app_message_register_outbox_failed(outbox_failed_callback);
-    app_message_register_outbox_sent(outbox_sent_callback);
+    /*// Register callbacks*/
+    /*app_message_register_inbox_received(inbox_received_callback);*/
+    /*app_message_register_inbox_dropped(inbox_dropped_callback);*/
+    /*app_message_register_outbox_failed(outbox_failed_callback);*/
+    /*app_message_register_outbox_sent(outbox_sent_callback);*/
 
-    // Open AppMessage
-    app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+    /*// Open AppMessage*/
+    /*app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());*/
 }
 
 static void deinit() {
