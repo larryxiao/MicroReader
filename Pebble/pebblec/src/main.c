@@ -4,6 +4,9 @@
 #define KEY_TITLE 0
 #define KEY_SUMMARY 1
 
+#define STEP 3
+#define THRESH_HOLD 9
+
 static Window *s_main_window;
 static TextLayer *s_word_layer;
 static TextLayer *s_status_layer;
@@ -74,50 +77,60 @@ static void timer_callback() {
         end_char++;
     }
 
-    if (end_char - start_char <= 2) {
         /*1 6*/
         /*2 6*/
         /*3 4*/
         /*4 4*/
         /*5 4*/
+    if (end_char - start_char <= 2) {
         buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 7));
         memset(buffer, ' ', 7);
         for (char_index = start_char; char_index < end_char; char_index++) {
             buffer[char_index - start_char + 7] = content[char_index];
         }
         // magic formula
-        factor = (4 - end_char + start_char)*5 + 0*1 + 1;
+        factor = 0;
         buffer[end_char - start_char + 7] = 0;
-    } else {
-        if (end_char - start_char <= 6) {
-            buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 6));
-            memset(buffer, ' ', 6);
-            for (char_index = start_char; char_index < end_char; char_index++) {
-                buffer[char_index - start_char + 6] = content[char_index];
-            }
-            // magic formula
-            factor = (4 - end_char + start_char)*5 + 0*1 + 1;
-            buffer[end_char - start_char + 6] = 0;
-        } else {
-            if (end_char - start_char <= 11) {
-                buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 3));
-                memset(buffer, ' ', 3);
-                for (char_index = start_char; char_index < end_char; char_index++) {
-                    buffer[char_index - start_char + 3] = content[char_index];
-                }
-                // magic formula
-                factor = (4 - end_char + start_char)*5 + 0*1 + 1;
-                buffer[end_char - start_char + 3] = 0;
-            } else {
-                buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char));
-                for (char_index = start_char; char_index < end_char; char_index++) {
-                    buffer[char_index - start_char] = content[char_index];
-                }
-                // magic formula
-                factor = (4 - end_char + start_char)*5 + 0*1 + 1;
-                buffer[end_char - start_char] = 0;
-            }
+    } 
+    if (end_char - start_char >= 3 && end_char - start_char <= 4) {
+        buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 6));
+        memset(buffer, ' ', 6);
+        for (char_index = start_char; char_index < end_char; char_index++) {
+            buffer[char_index - start_char + 6] = content[char_index];
         }
+        // magic formula
+        factor = 0;
+        buffer[end_char - start_char + 6] = 0;
+    } 
+    if (end_char - start_char >= 5 && end_char - start_char <= 6) {
+        buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 6));
+        memset(buffer, ' ', 6);
+        for (char_index = start_char; char_index < end_char; char_index++) {
+            buffer[char_index - start_char + 6] = content[char_index];
+        }
+        // magic formula
+        factor = 0;
+        buffer[end_char - start_char + 6] = 0;
+    } 
+    if (end_char - start_char >= 7 && end_char - start_char <= 11) {
+        buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 3));
+        memset(buffer, ' ', 3);
+        for (char_index = start_char; char_index < end_char; char_index++) {
+            buffer[char_index - start_char + 3] = content[char_index];
+        }
+        // magic formula
+        factor = (THRESH_HOLD - end_char + start_char)*STEP + 0*1 + 1;
+        buffer[end_char - start_char + 3] = 0;
+    } 
+
+    if (end_char - start_char >= 12) {
+        buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char));
+        for (char_index = start_char; char_index < end_char; char_index++) {
+            buffer[char_index - start_char] = content[char_index];
+        }
+        // magic formula
+        factor = (THRESH_HOLD - end_char + start_char)*STEP + 0*1 + 1;
+        buffer[end_char - start_char] = 0;
     }
 
     // split content to get clean word everytime it's called
@@ -134,10 +147,13 @@ static void timer_callback() {
 
     // report read speed
     static char speed_buffer[8];
+    wpm = wpm + factor * factorEnabled;
+    if (wpm < 100) wpm = 100;
+    if (wpm > 2000) wpm = 2000;
     snprintf(speed_buffer, sizeof(speed_buffer), "%d wpm", wpm);
     text_layer_set_text(s_status_layer, speed_buffer);
 
-    timer = app_timer_register(60*1000/wpm+factor*factorEnabled, (AppTimerCallback) timer_callback, NULL);
+    timer = app_timer_register(60*1000/wpm, (AppTimerCallback) timer_callback, NULL);
 }
 
 static void main_window_load(Window *window) {
@@ -287,7 +303,7 @@ static void down_multi_click_handler(ClickRecognizerRef recognizer, void *contex
 }
 
 static void select_multi_click_handler(ClickRecognizerRef recognizer, void *context) {
-    factorEnabled = 0 ? 1 : 0;
+    factorEnabled = 1 - factorEnabled;
     APP_LOG(APP_LOG_LEVEL_INFO, "select_multi_click_handler success!");
 }
 
@@ -322,7 +338,7 @@ static void config_provider(Window *window) {
 static void init() {
     // Spribble init
     title = "Hello World!";
-    content = "Hi, this is team PebbleReader at HackShanghai! (introduction) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu consectetur eros. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Suspendisse vulputate iaculis metus ut lacinia. Nunc dapibus elit in turpis euismod volutpat. Aenean magna neque, fringilla id dui eget, imperdiet volutpat justo. Aliquam ut diam malesuada nunc consectetur vulputate eget ut augue. Nullam lacinia vestibulum lacinia. Pellentesque nisl eros, elementum nec nibh a, efficitur elementum orci. Morbi dolor nisi, mattis sit amet velit eu, maximus tempus odio. Curabitur placerat pulvinar nisi. Nulla auctor tempor viverra. Vestibulum nec urna interdum, imperdiet quam vel, viverra enim. Aenean vitae metus nibh.";
+    content = "Hi, this is team PebbleReader at HackShanghai! By Guy Faulconbridge and Alistair Smout PERTH Scotland (Reuters) - If Scottish nationalists win a 'kingmaker' position in Britain's May 2015 election, they would consider supporting a minority Labour government but would never get into bed with the Conservatives, their leader in the London parliament said. Since Scots voted by 55-45 percent to preserve the United Kingdom in a Sept. 18 referendum, support for the Scottish National Party has surged on a perception that Britain's rulers are backsliding on pledges to grant more powers. ...";
 
     start_entry = 0;
 
