@@ -12,3 +12,7 @@ list:
 
 logs:
 	pebble logs --phone 172.27.221.14
+
+screen:
+	pebble screenshot --phone 172.27.221.14
+
