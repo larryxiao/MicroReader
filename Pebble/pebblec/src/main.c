@@ -37,6 +37,7 @@ static int ptr = 0;
 // range 10 - 70
 static int speed[] = {10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10};
 /*static int speed[] = {10, 20, 30, 20, 30, 40, 50, 20, 30, 40, 10, 20, 40, 30, 50, 20, 10, 30, 20, 40, 10, 20, 25, 30, 45, 60};*/
+static int plot_enabled = 1;
 
 static void timer_callback() {
     // Get a tm structure
@@ -247,7 +248,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     APP_LOG(APP_LOG_LEVEL_INFO, "Enter inbox_received_callback!");
     // Store incoming information
     /*free(content);*/
-    content = malloc(256);
+    content = malloc(1024);
     title = malloc(50);
     APP_LOG(APP_LOG_LEVEL_INFO, "inbox_received_callback! 1");
 
@@ -257,11 +258,12 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // For all items
     while(t != NULL) {
         // Which key was received?
-    APP_LOG(APP_LOG_LEVEL_INFO, "inbox_received_callback! 2");
+        APP_LOG(APP_LOG_LEVEL_INFO, "inbox_received_callback! 2");
         switch(t->key) {
             case KEY_CONTENT:
                 /*snprintf(content, sizeof(content), "%s", t->value->cstring);*/
                 /*snprintf(content, sizeof(t->value->cstring), "%s", t->value->cstring);*/
+                /*content = (char *) malloc(sizeof(t->value->cstring) + 10);*/
                 strcpy(content, t->value->cstring);
                 break;
                 /*case KEY_TEMPERATURE:*/
@@ -381,42 +383,44 @@ static void config_provider(Window *window) {
 
 // plot path part
 static void path_layer_update_callback(Layer *me, GContext *ctx) {
-  (void)me;
+    (void)me;
     graphics_context_set_stroke_color(ctx, GColorWhite);
     /*gpath_draw_outline(ctx, speed_path);*/
-    int j;
-    for (j = 0; j<=24; ++j){
-        int i = (j+ptr+12) % 25;
-        if(i != 24)
-            graphics_draw_line(ctx, GPoint(i*5+PLOT_OFFSET, 60 - speed[i]), GPoint((i+1)*5+PLOT_OFFSET, 60 - speed[i+1]));
+    if (plot_enabled){
+        int j;
+        for (j = 0; j<=24; ++j){
+            int i = (j+ptr+12) % 25;
+            if(i != 24)
+                graphics_draw_line(ctx, GPoint(i*5+PLOT_OFFSET, 60 - speed[i]), GPoint((i+1)*5+PLOT_OFFSET, 60 - speed[i+1]));
+        }
     }
 }
 
 // This is an example of a path that looks like a compound path
 // If you rotate it however, you will see it is a single shape
 /*static const GPathInfo SPEED_PATH_POINTS = {*/
-  /*25,*/
-  /*(GPoint []) {*/
-    /*{5, 10},    {10, 10},*/
-    /*{15, 10},    {20, 10},*/
-    /*{25, 10},    {30, 20},*/
-    /*{35, 20},    {40, 20},*/
-    /*{40, 20},    {45, 20},*/
-    /*{50, 20},    {55, 30},*/
-    /*{60, 30},    {65, 30},*/
-    /*{70, 30},    {75, 30},*/
-    /*{80, 40},    {85, 40},*/
-    /*{90, 40},    {95, 40},*/
-    /*{100, 40},   {105, 50},*/
-    /*{110, 50},   {115, 50},*/
-    /*{120, 50},   {125, 50}*/
-  /*}*/
+/*25,*/
+/*(GPoint []) {*/
+/*{5, 10},    {10, 10},*/
+/*{15, 10},    {20, 10},*/
+/*{25, 10},    {30, 20},*/
+/*{35, 20},    {40, 20},*/
+/*{40, 20},    {45, 20},*/
+/*{50, 20},    {55, 30},*/
+/*{60, 30},    {65, 30},*/
+/*{70, 30},    {75, 30},*/
+/*{80, 40},    {85, 40},*/
+/*{90, 40},    {95, 40},*/
+/*{100, 40},   {105, 50},*/
+/*{110, 50},   {115, 50},*/
+/*{120, 50},   {125, 50}*/
+/*}*/
 /*};*/
 
 // accelerometer, shake
 static void tap_handler(AccelAxisType axis, int32_t direction) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Shake!");
-
+    plot_enabled = 1 - plot_enabled;
 }
 
 
