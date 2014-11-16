@@ -1,8 +1,9 @@
 #include <pebble.h>
 #include <string.h>
 
-#define KEY_TITLE 0
-#define KEY_SUMMARY 1
+#define KEY_CONTENT 0
+/*#define KEY_TITLE 0*/
+/*#define KEY_SUMMARY 1*/
 
 #define STEP 3
 #define THRESH_HOLD 9
@@ -77,11 +78,11 @@ static void timer_callback() {
         end_char++;
     }
 
-        /*1 6*/
-        /*2 6*/
-        /*3 4*/
-        /*4 4*/
-        /*5 4*/
+    /*1 6*/
+    /*2 6*/
+    /*3 4*/
+    /*4 4*/
+    /*5 4*/
     if (end_char - start_char <= 2) {
         buffer = (char*)malloc(sizeof(char)*(1 + end_char - start_char + 7));
         memset(buffer, ' ', 7);
@@ -210,8 +211,12 @@ static void main_window_unload(Window *window) {
 
 static void send_request() {
     // Begin dictionary
-    DictionaryIterator *iter;
+    DictionaryIterator *iter = NULL;
     app_message_outbox_begin(&iter);
+    if (iter == NULL) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "send_request NULL!");
+        return;
+    } else APP_LOG(APP_LOG_LEVEL_INFO, "send_request OK!");
 
     // Add a key-value pair
     dict_write_uint8(iter, 0, 0);
@@ -223,6 +228,7 @@ static void send_request() {
 /* communication handler */ 
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Enter inbox_received_callback!");
     // Store incoming information
     free(content);
     content = malloc(256);
@@ -235,15 +241,18 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     while(t != NULL) {
         // Which key was received?
         switch(t->key) {
-            /*case KEY_TEMPERATURE:*/
-            /*snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);*/
-            /*break;*/
-            case KEY_TITLE:
-                snprintf(title, sizeof(title), "%s", t->value->cstring);
-                break;
-            case KEY_SUMMARY:
+            case KEY_CONTENT:
                 snprintf(content, sizeof(content), "%s", t->value->cstring);
                 break;
+                /*case KEY_TEMPERATURE:*/
+                /*snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);*/
+                /*break;*/
+                /*case KEY_TITLE:*/
+                /*snprintf(title, sizeof(title), "%s", t->value->cstring);*/
+                /*break;*/
+                /*case KEY_SUMMARY:*/
+                /*snprintf(content, sizeof(content), "%s", t->value->cstring);*/
+                /*break;*/
             default:
                 APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
                 break;
@@ -254,6 +263,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
 
     // ready
+    start_entry = 0;
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -280,7 +290,20 @@ static void down_single_click_handler(ClickRecognizerRef recognizer, void *conte
 
 // pass
 static void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-    start_entry = 0;
+    /*send_request();*/
+    // Begin dictionary
+    DictionaryIterator *iter = NULL;
+    app_message_outbox_begin(&iter);
+    if (iter == NULL) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "send_request NULL!");
+        return;
+    } else APP_LOG(APP_LOG_LEVEL_INFO, "send_request OK!");
+
+    // Add a key-value pair
+    dict_write_uint8(iter, 0, 0);
+
+    // Send the message!
+    app_message_outbox_send();
     APP_LOG(APP_LOG_LEVEL_INFO, "select_single_handler success!");
 }
 
@@ -335,6 +358,13 @@ static void config_provider(Window *window) {
 
 }
 
+// tap handle
+static void tap_handler(AccelAxisType axis, int32_t direction) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Shake!");
+
+}
+
+
 static void init() {
     // Spribble init
     title = "Hello World!";
@@ -360,6 +390,9 @@ static void init() {
     // Register with TickTimerService
     /*tick_timer_service_subscribe(SECOND_UNIT, tick_handler);*/
     timer = app_timer_register(60*1000/wpm, (AppTimerCallback) timer_callback, NULL);
+
+    // Register with Accelerometers
+    accel_tap_service_subscribe(tap_handler);
 
     /*// Register callbacks*/
     /*app_message_register_inbox_received(inbox_received_callback);*/
