@@ -2,6 +2,10 @@
 #include <string.h>
 
 #define KEY_CONTENT 0
+#define KEY_ID 4
+#define VOTE_UP 1
+#define VOTE_DOWN 2
+#define VOTE_SKIP 3
 /*#define KEY_TITLE 0*/
 /*#define KEY_SUMMARY 1*/
 
@@ -9,6 +13,10 @@
 #define THRESH_HOLD 9
 #define PLOT_OFFSET 10
 
+// vote
+static int id = -1;
+
+// main
 static Window *s_main_window;
 static TextLayer *s_word_layer;
 static TextLayer *s_status_layer;
@@ -226,6 +234,23 @@ static void main_window_unload(Window *window) {
     fonts_unload_custom_font(s_status_font);
 }
 
+static bool send_to_phone_multi(int quote_key) {
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    if (iter == NULL) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "null iter");
+        return false;
+    }
+
+    Tuplet tuple = TupletInteger(quote_key, id);
+
+    dict_write_tuplet(iter, &tuple);
+    dict_write_end(iter);
+
+    app_message_outbox_send();
+    return true;
+}
+
 static void send_request() {
     // Begin dictionary
     DictionaryIterator *iter = NULL;
@@ -266,8 +291,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 /*content = (char *) malloc(sizeof(t->value->cstring) + 10);*/
                 strcpy(content, t->value->cstring);
                 break;
-                /*case KEY_TEMPERATURE:*/
-                /*snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);*/
+                /*case KEY_ID:*/
+                /*snprintf(id, sizeof(id), "%dC", (int)t->value->int32);*/
                 /*break;*/
                 /*case KEY_TITLE:*/
                 /*snprintf(title, sizeof(title), "%s", t->value->cstring);*/
@@ -305,29 +330,18 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 /* clicks handler */
 
 static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+    send_to_phone_multi(VOTE_UP);
     APP_LOG(APP_LOG_LEVEL_INFO, "up_single_click_handler success!");
 }
 
 static void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+    send_to_phone_multi(VOTE_DOWN);
     APP_LOG(APP_LOG_LEVEL_INFO, "down_single_click_handler success!");
 }
 // pass
 static void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-    /*send_request();*/
-    // Begin dictionary
-    DictionaryIterator *iter = NULL;
-    app_message_outbox_begin(&iter);
-    if (iter == NULL) {
-        APP_LOG(APP_LOG_LEVEL_INFO, "send_request NULL!");
-        return;
-    } else APP_LOG(APP_LOG_LEVEL_INFO, "send_request OK!");
-
-    // Add a key-value pair
-    dict_write_uint8(iter, 0, 0);
-
-    // Send the message!
-    app_message_outbox_send();
-    APP_LOG(APP_LOG_LEVEL_INFO, "select_single_handler success!");
+    send_to_phone_multi(VOTE_SKIP);
+    APP_LOG(APP_LOG_LEVEL_INFO, "select_single_click_handler success!");
 }
 
 static void up_multi_click_handler(ClickRecognizerRef recognizer, void *context) {

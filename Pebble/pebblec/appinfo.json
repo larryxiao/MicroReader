@@ -1,6 +1,10 @@
 {
     "appKeys": {
-        "KEY_CONTENT": 0
+        "KEY_CONTENT": 0,
+        "VOTE_UP": 1,
+        "VOTE_DOWN": 2,
+        "VOTE_SKIP": 3,
+        "KEY_ID": 4
     },
     "capabilities": [
         "location"
