@@ -1,5 +1,29 @@
 /* Empty. Add your own CSS if you like */
 .actionarea {
   text-align: center;
-  background:white;
+  background: white;
+}
+
+/* feed card */
+.list.card.feedcard {
+  padding: 5px 0px 0px 0px;
+  margin: 5px 15px 10px 15px;
+}
+
+.item {
+  border-color: #ddd;
+  background-color: #fff;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+  /* display: block; */
+  margin: -1px;
+  padding: 16px;
+  border-width: 1px;
+  border: none !important;
+  font-size: 16px;
+}
+
+.item.tabs.tabs-secondary.tabs-icon-left.card-action {
+  background-color: #fff !important;
 }

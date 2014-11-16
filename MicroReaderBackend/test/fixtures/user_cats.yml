@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  avg_predict: 9.99
+  avg_action: 9.99
+  user_id: 1
+  category: 1
+
+two:
+  avg_predict: 9.99
+  avg_action: 9.99
+  user_id: 1
+  category: 1

@@ -3,24 +3,43 @@ angular.module('starter.services', [])
 /**
  * A simple example service that returns some data.
  */
-.factory('Friends', function() {
-  // Might use a resource here that returns a JSON array
-
+.factory('Articles', function() {
   // Some fake testing data
-  var friends = [
-    { id: 0, name: 'Scruff McGruff' },
-    { id: 1, name: 'G.I. Joe' },
-    { id: 2, name: 'Miss Frizzle' },
-    { id: 3, name: 'Ash Ketchum' }
+  var articles = [
+    { id: 0, date: 'December', title: 'Butter', abstract: 'These buttery, bacony cheesy scones are heaven in one easy bite. Perfect for brunch, they would also make for a great lunch alongside a bountiful salad. To take these scones over the top, add a pinch of grated cheese to the top of each one before you slide them into the oven.'},
+    { id: 1, date: 'December', title: 'Butter', abstract: 'These buttery, bacony cheesy scones are heaven in one easy bite. Perfect for brunch, they would also make for a great lunch alongside a bountiful salad. To take these scones over the top, add a pinch of grated cheese to the top of each one before you slide them into the oven.'},
+    { id: 2, date: 'December', title: 'Butter', abstract: 'These buttery, bacony cheesy scones are heaven in one easy bite. Perfect for brunch, they would also make for a great lunch alongside a bountiful salad. To take these scones over the top, add a pinch of grated cheese to the top of each one before you slide them into the oven.'},
+    { id: 3, date: 'December', title: 'Butter', abstract: 'These buttery, bacony cheesy scones are heaven in one easy bite. Perfect for brunch, they would also make for a great lunch alongside a bountiful salad. To take these scones over the top, add a pinch of grated cheese to the top of each one before you slide them into the oven.'}
   ];
 
   return {
     all: function() {
-      return friends;
+      return articles;
     },
-    get: function(friendId) {
-      // Simple index lookup
-      return friends[friendId];
+    get: function(articleId) {
+      return articles[articleId];
     }
-  }
+  };
+})
+
+
+.factory('Categories', function() {
+  // Some fake testing data
+  var categories = [
+    {id: 0, name:"food"},
+    {id: 1, name:"game"},
+    {id: 2, name:"media"}
+  ];
+
+  return {
+    all: function() {
+      return categories;
+    },
+    get: function(id) {
+      return categories[id];
+    }
+  };
 });
+
+
+

@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  action: 1
+  predict: 9.99
+  user_id: 1
+  feed_id: 1
+
+two:
+  action: 1
+  predict: 9.99
+  user_id: 1
+  feed_id: 1

@@ -21,13 +21,55 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   });
 })
 
-.config(function($stateProvider, $urlRouterProvider) {
+// .config(function($routeProvider, $httpProvider) {
+//   $httpProvider.defaults.headers.common = {};
+//   $httpProvider.defaults.headers.post = {};
+//   $httpProvider.defaults.headers.put = {};
+//   $httpProvider.defaults.headers.patch = {};
+//   $httpProvider.defaults.useXDomain = true;
+//   delete $httpProvider.defaults.headers.common['X-Requested-With'];
+//   $routeProvider.
+//       when('/user', {
+//         templateUrl: 'templates/user-login.html',
+//         controller: 'UserLoginCtrl'
+//       });
+// });
+
+.config(function($stateProvider, $urlRouterProvider, $httpProvider) {
+  $httpProvider.defaults.headers.common = {};
+  $httpProvider.defaults.headers.post = {};
+  $httpProvider.defaults.headers.put = {};
+  $httpProvider.defaults.headers.patch = {};
+  $httpProvider.defaults.useXDomain = true;
+  delete $httpProvider.defaults.headers.common['X-Requested-With'];
 
   // Ionic uses AngularUI Router which uses the concept of states
   // Learn more here: https://github.com/angular-ui/ui-router
   // Set up the various states which the app can be in.
   // Each state's controller can be found in controllers.js
   $stateProvider
+
+    // returning user.
+    .state('user', {
+      url: '/user',
+      views: {
+        'user': {
+          templateUrl: 'templates/user-login.html',
+          controller: 'UserLoginCtrl'
+        }
+      }
+    })
+
+    // new user.
+    .state('user.reg', {
+      url: '/reg',
+      views: {
+        'user-reg': {
+          templateUrl: 'templates/user-reg.html',
+          controller: 'UserRegCtrl'
+        }
+      }
+    })
 
     // setup an abstract state for the tabs directive
     .state('tab', {
@@ -48,6 +90,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       }
     })
 
+    .state('tab.dash-detail', {
+      url: '/dash/:articleId',
+      views: {
+        'tab-dash': {
+          templateUrl: 'templates/dash-detail.html',
+          controller: 'DashDetailCtrl'
+        }
+      }
+    })
+
     .state('tab.personal', {
       url: '/personal',
       views: {
@@ -57,28 +109,29 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
         }
       }
     })
-    .state('tab.friend-detail', {
-      url: '/friend/:friendId',
-      views: {
-        'tab-personal': {
-          templateUrl: 'templates/friend-detail.html',
-          controller: 'FriendDetailCtrl'
-        }
-      }
-    })
 
     .state('tab.setting', {
       url: '/setting',
       views: {
         'tab-setting': {
-          templateUrl: 'templates/tab-setting.html',
+          templateUrl: 'templates/user-reg.html',
           controller: 'AccountCtrl'
         }
       }
-    });
+    })
+
+    .state('tab.user-topic', {
+      url: '/setting/topic',
+      views: {
+        'tab-setting': {
+          templateUrl: 'templates/user-topic.html',
+          controller: 'RegisterTopicCtrl'
+        }
+      }
+    })
+    ;
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/tab/dash');
 
 });
-

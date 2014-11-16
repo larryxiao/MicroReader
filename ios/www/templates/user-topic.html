@@ -1,0 +1,21 @@
+<ion-view hide-nav-bar="true">
+<ion-header-bar class="bar bar-header bar-positive">
+<h1 class="title">Choose Topic</h1>
+</ion-header-bar>
+<ion-content [scroll="false"]>
+<div ng-controller="RegisterTopicCtrl">
+  <ul class="list" ng-repeat="category in categories" style="padding:0">
+      <li class=" item-checkbox" style="text-align: left; padding-bottom:30px;">
+        <ion-checkbox class="checkbox" ng-model="isChecked[category]" style="padding-left:30px; padding-bottom: 10 px; padding-top: 10 px; background-color:{{$index % 2 == 0 ? '#f0f0f0' : '#ffffff'}}">
+          <h2 style="margin-left:40px;">{{category}} {{index}}</h2>
+        </ion-checkbox>
+
+      </li>
+  </ul>
+  <button class="button button-full button-assertive" ng-click="setup()">
+    Set up!
+  </button>
+</div>
+</ion-content>
+</ion-view>
+

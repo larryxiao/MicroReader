@@ -1,0 +1,24 @@
+<ion-view hide-nav-bar="true">
+<ion-header-bar class="bar bar-header bar-positive">
+<h1 class="title">New User</h1>
+</ion-header-bar>
+<ion-content [scroll="false"]>
+  <div ng-controller="RegisterController">
+    <div class="list">
+      <label class="item item-input">
+        <input type="text" placeholder="User Name" ng-model="username">
+      </label>
+      <label class="item item-input">
+        <input type="password" placeholder="Password" ng-model="password">
+      </label>
+      <label class="item item-input">
+        <input type="text" placeholder="Log" ng-model="log">
+      </label>
+      <button class="button button-full button-assertive" ng-click="register()">
+        Create Account
+      </button>
+    </div>
+  </div>
+</ion-content>
+</ion-view>
+

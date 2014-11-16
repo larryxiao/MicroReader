@@ -1,0 +1,129 @@
+# encoding: utf-8
+class CategoriesController < ApplicationController
+  skip_before_filter :verify_authenticity_token, :only => [:get_all_categories, :initialize_with_categories]  
+
+  def get_all_categories
+    data = JSON.parse(params["json"]) 
+    all_usernames = User.all.map { |u| u.username} 
+    unless all_usernames.include? data["username"]
+      User.create({username: data["username"]})
+      user_id = User.find_by_username(data['username']).id
+      Feed.all.each do |f|
+        Record.create({user_id: user_id, feed_id: f.id, action:0, predict: 0}) 
+      end
+      Category.all.each do |t|
+        UserCat.create({user_id: user_id, category_id: t.id, avg_predict:0, avg_action: 0})
+      end
+    end
+    ActiveUser.first.update_attributes(user_id: User.find_by_username(data["username"]).id)
+    all_cats = Category.all
+    response = Hash.new
+    response[:user_id] = User.find_by_username(data["username"]).id
+    category_hash = Hash.new
+    all_cats.each do |c|
+      category_hash[c.id] = c.label
+    end
+    response[:category] = category_hash 
+    respond_to do |format|
+      format.json { render json: JSON.generate(response) }
+    end
+  end
+
+  def initialize_with_categories
+    data = JSON.parse(params["json"])
+    data["categories"].each do |c|
+      cat = Category.find(c[0].to_i)
+      like_feeds = cat.feeds.sample((cat.feeds.length * 0.3).to_i)
+      like_feeds.each do |f|
+        Record.find_by_user_id_and_feed_id(active_user_id, f.id).update_attributes({action: 1})
+      end
+    end
+    recompute_scores
+    initialize_recommendation
+    response = Hash.new
+    response[:msg] = "success"
+    respond_to do |format|
+      format.json { render json: JSON.generate(response) }
+    end
+  end
+
+  def initialize_recommendation
+    init_hash = Hash.new
+    init_hash[:numUser] = User.all.length
+    init_hash[:numArticle] = Feed.all.length 
+    action_hash = Hash.new { Hash.new }
+    predict_hash= Hash.new { Hash.new }
+    User.all.each_with_index do |u, i|
+      action_hash_temp = Hash.new
+      predict_hash_temp = Hash.new
+      Feed.all.each_with_index do |f, j|
+        r = Record.find_by_user_id_and_feed_id(u.id, f.id) 
+        action_hash_temp[j] = r.action
+        predict_hash_temp[j] = r.predict
+      end
+      action_hash[i] = action_hash_temp
+      predict_hash[i] = predict_hash_temp
+    end
+    init_hash[:rating] = action_array
+    init_hash[:predicion] = predict_array
+    json_headers = {"Content-Type" => "application/json",
+                "Accept" => "application/json"}
+    uri = URI.parse('http://172.27.221.133:5001/')
+    http = Net::HTTP.new(uri.host, uri.port)
+    response = http.post(uri.path, init_hash.to_json, json_headers)
+    debugger
+    debugger
+  end
+
+  def recompute_scores
+    Category.all.each do |cat|
+      records = cat.feeds.map { |f| Record.find_by_user_id_and_feed_id(active_user_id, f.id) }
+      total_action = records.map { |r| r.action}.reduce(0) { |accum, i| accum + i }
+      total_predict = records.map { |r| r.predict}.reduce(0) { |accum, i| accum + i }
+      uc = UserCat.find_by_user_id_and_category_id(active_user_id, cat.id)
+      uc.update_attributes({avg_action: total_action.to_f / records.length, avg_predict: total_predict / records.length })
+    end
+  end
+
+  def pebble_get_feed
+    response = Hash.new
+    response[:summary] = handle_string(Feed.first.summary)
+    respond_to do |format|
+      format.json { render json: JSON.generate(response) }
+    end
+  end
+
+  def active_user_id
+    ActiveUser.first.id
+  end
+
+  def handle_string(s)
+	  s = HTMLEntities.new.decode(s);
+	  ss = "";
+	  num = s.length - 1;
+	  state = 0;
+	  for i in 0..num
+		  if state == 0
+			  if s[i] == "<"
+				  state = 1
+			  elsif s[i] == "\\"
+				  state = 2
+			  else
+				  if s[i] != "\n" && s[i] != "\t" && s[i] != "\r"
+					  ss = ss + s[i]
+				  end
+			  end
+		  elsif state == 1
+			  if s[i] == ">"
+				  state = 0
+			  end
+		  else
+			  if s[i] != "n" && s[i] != "\\" && s[i] != "t" && s[i] != "r" && s[i] != "\""
+				  ss = ss + "\#{s[i]}"
+			  end
+			  state = 0;
+		  end				
+	  end
+	  return ss;
+  end 
+end
