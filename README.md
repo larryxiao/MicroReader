@@ -1,8 +1,7 @@
 # MicroReader
-* ![](pic/MicroReader.jpeg)
-* ![](pic/Pebble.png)
-* ![](pic/iOS.png)
 
+* <img src="pic/MicroReader.jpeg" height="320px">
+* <img src="pic/Pebble.png" width="200px"> <img src="pic/iOS.png" width="200px">
 
 # Design Ideas
 
