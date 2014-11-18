@@ -1,3 +1,9 @@
+# MicroReader
+* ![](pic/MicroReader.jpeg)
+* ![](pic/Pebble.png)
+* ![](pic/iOS.png)
+
+
 # Design Ideas
 
 *  Pebble part
