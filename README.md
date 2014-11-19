@@ -3,13 +3,16 @@
 * <img src="pic/MicroReader.jpeg" height="320px">
 * <img src="pic/Pebble.png" width="200px"> <img src="pic/iOS.png" width="200px">
 
-# Design Ideas
+* note: the project is created during a 24hrs hackathon, so the code demands great improvement ..
+
+# Features
 
 *  Pebble part
-   *  看title/abstract，可以继续在手机上看完整的 
-   *  手机/手表上可以 点鸡蛋/鲜花 (可以点跳过)。 手机打开时，默认为鲜花。
-   *  [Pebble Workbook](Pebble/Workbook.md)
-   *  [Other Pebble Projects](Pebble/PebbleProjects.md)
+   *  display title/summary (can read full featured article on phone, handoff feature)
+   *  single click up/down button for like/dislike (note when opened on phone, will consider you like the article)
+   *  single click select button to skip, and read next item
+   *  double click up/down button to adjust reading speed.
+   *  double click select button to adjust speed automatically (a simple algorithm that changes the rate according to word length and frequency)
 
 *  content / backend part
    * 推荐系统
@@ -21,17 +24,18 @@
    *  完整内容
    *  up vote / down vote
    *  用户偏好的可视化
-      * 后台/手机显示用户的tag 
-
+      * 后台/手机显示用户的tag
 
 # Reference
-* Spritz
-  *  [Spritz SDK] (doc/sprtiz.md)
-* [Ionic Framework] (http://ionicframework.com/)
-  *  Install: npm install -g cordova ionic
-  *  
-*	Content
-	*	RSS / Feed
-		*	[The feedly Cloud API](http://developer.feedly.com/)
-			*	[Entries](http://developer.feedly.com/v3/entries/), [Feeds](http://developer.feedly.com/v3/feeds/), [Tags](http://developer.feedly.com/v3/tags/)
 
+* Pebble
+	* [Pebble Workbook](Pebble/Workbook.md)
+	* [Other Pebble Projects](Pebble/PebbleProjects.md) 
+* Spritz
+ 	* [Spritz SDK] (doc/sprtiz.md)
+* [Ionic Framework] (http://ionicframework.com/)
+	*  Install: npm install -g cordova ionic
+* Content
+	* RSS / Feed
+		*	[The feedly Cloud API](http://developer.feedly.com/)
+		*	[Entries](http://developer.feedly.com/v3/entries/), [Feeds](http://developer.feedly.com/v3/feeds/), [Tags](http://developer.feedly.com/v3/tags/)
