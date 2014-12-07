@@ -1,5 +1,8 @@
 # MicroReader
 
+<p>We'd like to enhance reading experiences on tiny display screens. The idea is to combine big data with innovative display technology. MicroReader is a Pebble app that effectively flash streaming texts on smartwatch screen word by word, with content tailored to the taste of individual users. </p>
+
+
 * <img src="pic/MicroReader.jpeg" height="320px">
 * <img src="pic/Pebble.png" width="200px"> <img src="pic/iOS.png" width="200px">
 
